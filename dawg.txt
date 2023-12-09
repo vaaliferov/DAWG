@@ -1,0 +1,9 @@
+git clone --recursive https://github.com/pymorphy2-fork/DAWG.git
+
+cd DAWG
+
+python3 -m venv env
+source env/bin/activate
+pip install .
+
+python3 test.py
