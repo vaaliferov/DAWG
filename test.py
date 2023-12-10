@@ -2,16 +2,14 @@ import dawg
 
 words = [
     'ёжик',
-    'ежик',
-    'ежик_3,4,5,6',
-    'ёжик@111,222,333,444',
-    'ежик@222,333,444,555',
-    'ежик@333,444,555,666',
-    'ежика@333,444,555,666'
+    'ёжик,111,222,333,444',
+    'ежик,222,333,444,555',
+    'ежик,333,444,555,666',
+    'ежика,333,444,555,666'
 ]
 
 params = {
-    'sep': '@',
+    'sep': ',',
     'keys': words,
     'replaces': {'е':'ё'}
 }
@@ -22,16 +20,13 @@ print(dwg.similar_items('ёжик'))
 
 def unpack(item):
     return list(map(int, item.split(',')[1:]))
-    # key, value = item.split('@')
-    # return key, value.split(',')
-    # return list(map(int, value.split(',')))
 
 import time
 start_time = time.time()
 
 for _ in range(400000):
     results = dwg.similar_items('ежик')
-    # results = list(map(unpack, results))
+    results = list(map(unpack, results))
     # words[results[0][0]]
 
 print("--- %s seconds ---" % (time.time() - start_time))
@@ -39,7 +34,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 dwg.save('words.dawg')
 
 params = {
-    'sep': '@',
+    'sep': ',',
     'path': 'words.dawg',
     'replaces': {'е':'ё'}
 }

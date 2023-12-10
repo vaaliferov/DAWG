@@ -132,3 +132,10 @@ cdef class DAWG:
 
     cpdef list similar_items(self, unicode key):
         return self._similar_items('', key, self.dct.root())
+
+        
+        
+# cdef unpack(unicode item):
+#    return list(map(int, item.split(',')[1:]))
+
+# return [unpack(x) for x in self._similar_items('', key, self.dct.root())]
