@@ -2,9 +2,8 @@
 
 import sys
 
-cimport iostream
-
 cimport _dawg
+cimport _iostream
 cimport _guide_builder
 cimport _dictionary_builder
 
@@ -14,15 +13,9 @@ from _completer cimport Completer
 from _dictionary cimport Dictionary
 from _dawg_builder cimport DawgBuilder
 
-from iostream cimport istream
-from iostream cimport ostream
-from iostream cimport ifstream
-# from iostream cimport ofstream
-from iostream cimport stringstream
-
-from _base_types cimport BaseType
-from _base_types cimport CharType
-from _base_types cimport SizeType
+from _iostream cimport istream, ostream
+from _iostream cimport ifstream, stringstream
+from _base_types cimport BaseType, CharType
 
 from libcpp.string cimport string
 
@@ -64,7 +57,7 @@ cdef class DAWG:
         cdef ifstream stream
         
         path = path.encode(sys.getfilesystemencoding())
-        stream.open(path, iostream.binary)
+        stream.open(path, _iostream.binary)
             
         if stream.fail():
             raise IOError("It's not possible to read file stream")

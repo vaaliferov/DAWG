@@ -1,6 +1,6 @@
 from _base_types cimport BaseType, CharType, SizeType, UCharType, ValueType
 from _guide_unit cimport GuideUnit
-from iostream cimport istream, ostream
+from _iostream cimport istream, ostream
 
 
 cdef extern from "../lib/dawgdic/src/dawgdic/guide.h" namespace "dawgdic":

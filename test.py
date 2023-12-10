@@ -19,3 +19,7 @@ words_dawg.save('words.dawg')
 words_dawg = dawg.DAWG(path='words.dawg', sep='@')
 replaces = dawg.DAWG.compile_replaces({'е':'ё'})
 print(words_dawg.similar_keys('ежик', replaces))
+
+print(words_dawg._size())
+print(words_dawg._file_size())
+print(words_dawg._total_size())
