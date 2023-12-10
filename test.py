@@ -1,14 +1,13 @@
-
 import dawg
 
-words = ['test', 'girl', 'testing', 'girls', 'ёжик', 'ежик', 'ежика']
+words = [
+    'ёжик', 
+    'ежик', 
+    'ёжик@1,2,3,4', 
+    'ежик@2,3,4,5', 
+    'ежик@3,4,5,6'
+]
 
-d = dawg.CompletionDAWG(words)
-
-print(d.prefixes('testing'))
-
-replaces = dawg.DAWG.compile_replaces({'е': 'ё'})
-
-print(d.similar_keys('ежик', replaces))
-
-# print(dawg.BytesDAWG)
+words_dawg = dawg.DAWG(words, sep='@')
+replaces = dawg.DAWG.compile_replaces({'е':'ё'})
+print(words_dawg.similar_keys('ежик', replaces))
