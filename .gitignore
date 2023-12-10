@@ -1,4 +1,5 @@
 env/
 build/
+*.dawg
 *.egg-info/
 src/dawg.cpp
