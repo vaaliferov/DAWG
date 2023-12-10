@@ -101,11 +101,10 @@ cdef class DAWG:
         _guide_builder.Build(self.dawg, self.dct, &self.guide)
         
 
-    def __init__(self, path=None, keys=[], sep=' '):
+    def __init__(self, path=None, keys=None, sep=' '):
     
-        self.build(keys)
-    
-        if path: self.load(path)
+        if keys: self.build(keys)
+        elif path: self.load(path)
         
         self.completer = new Completer(self.dct, self.guide)
         self.sep, self.c_sep = sep, <unsigned int>ord(sep.encode())
