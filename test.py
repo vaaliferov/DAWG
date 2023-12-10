@@ -20,6 +20,14 @@ dwg = dawg.DAWG(**params)
 print(dwg.similar_items('ежик'))
 print(dwg.similar_items('ёжик'))
 
+def unpack(item):
+    key, value = item.split('@')
+    return list(map(int, value.split(',')))
+
+# for _ in range(400000):
+    # results = dwg.similar_items('ежик')
+    # [unpack(item) for item in results]
+
 dwg.save('words.dawg')
 
 params = {
