@@ -4,10 +4,10 @@ words = [
     'ёжик',
     'ежик',
     'ежик_3,4,5,6',
-    'ёжик@1,2,3,4',
-    'ежик@2,3,4,5',
-    'ежик@3,4,5,6',
-    'ежика@3,4,5,6'
+    'ёжик@111,222,333,444',
+    'ежик@222,333,444,555',
+    'ежик@333,444,555,666',
+    'ежика@333,444,555,666'
 ]
 
 params = {
@@ -21,12 +21,20 @@ print(dwg.similar_items('ежик'))
 print(dwg.similar_items('ёжик'))
 
 def unpack(item):
-    key, value = item.split('@')
-    return list(map(int, value.split(',')))
+    return list(map(int, item.split(',')[1:]))
+    # key, value = item.split('@')
+    # return key, value.split(',')
+    # return list(map(int, value.split(',')))
 
-# for _ in range(400000):
-    # results = dwg.similar_items('ежик')
-    # [unpack(item) for item in results]
+import time
+start_time = time.time()
+
+for _ in range(400000):
+    results = dwg.similar_items('ежик')
+    # results = list(map(unpack, results))
+    # words[results[0][0]]
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 dwg.save('words.dawg')
 
