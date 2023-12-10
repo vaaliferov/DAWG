@@ -1,7 +1,5 @@
 # distutils: language = c++
 
-import sys
-
 cimport _dawg
 cimport _iostream
 cimport _guide_builder
@@ -14,90 +12,69 @@ from _dictionary cimport Dictionary
 from _dawg_builder cimport DawgBuilder
 
 from _iostream cimport istream, ostream
-from _iostream cimport ifstream, stringstream
 from _base_types cimport BaseType, CharType
+from _iostream cimport ifstream, stringstream
 
 from libcpp.string cimport string
 
 
 cdef class DAWG:
 
-
-    cdef Dawg dawg
+    cdef unicode sep
+    cdef dict replaces
+    cdef CharType c_sep
+    
     cdef Guide guide
     cdef Dictionary dct
     cdef Completer* completer
-    
-    cdef unicode sep
-    cdef CharType c_sep
-    
-    
-    def _size(self):
-        return self.dct.size()
 
-    def _total_size(self):
-        return self.dct.total_size()
 
-    def _file_size(self):
-        return self.dct.file_size()
-    
-    
     def save(self, path):
-        
         cdef stringstream stream
         self.dct.Write(<ostream*>&stream)
         self.guide.Write(<ostream*>&stream)
-        
         with open(path, 'wb') as f:
            f.write(stream.str())
     
     
     def load(self, path):
-    
         cdef ifstream stream
-        
-        path = path.encode(sys.getfilesystemencoding())
+        path = path.encode()
         stream.open(path, _iostream.binary)
-            
-        if stream.fail():
-            raise IOError("It's not possible to read file stream")
-            
-        try:
-            res = self.dct.Read(<istream*> &stream)
-            if not res:
-                self.dct.Clear()
-                raise IOError("Invalid data format: can't load _dawg.Dictionary")
-
-            res = self.guide.Read(<istream*> &stream)
-            if not res:
-                self.dct.Clear()
-                self.guide.Clear()
-                raise IOError("Invalid data format: can't load _dawg.Guide")
-
-        finally:
-            stream.close()
+        self.dct.Read(<istream*>&stream)
+        self.guide.Read(<istream*>&stream)
+        stream.close()
 
 
     def build(self, keys):
     
         keys.sort()
-    
+        
+        cdef Dawg dawg
         cdef DawgBuilder builder
         
         for key in keys:
             b_key = key.encode()
             builder.Insert(b_key, len(b_key), 0)
         
-        builder.Finish(&self.dawg)
+        builder.Finish(&dawg)
         
-        _dictionary_builder.Build(self.dawg, &self.dct)
-        _guide_builder.Build(self.dawg, self.dct, &self.guide)
+        _dictionary_builder.Build(dawg, &self.dct)
+        _guide_builder.Build(dawg, self.dct, &self.guide)
+        
+        dawg.Clear()
         
 
-    def __init__(self, path=None, keys=None, sep=' '):
+    def __init__(self, sep, replaces, keys=None, path=None):
     
         if keys: self.build(keys)
         elif path: self.load(path)
+        
+        self.replaces = {
+            k.encode(): 
+            [(c.encode(), c) for c in v]
+            for k, v in replaces.items()
+        }
         
         self.completer = new Completer(self.dct, self.guide)
         self.sep, self.c_sep = sep, <unsigned int>ord(sep.encode())
@@ -105,52 +82,38 @@ cdef class DAWG:
 
     def __dealloc__(self):
         self.dct.Clear()
-        self.dawg.Clear()
         self.guide.Clear()
 
 
-    @staticmethod
-    def compile_replaces(replaces):
-        
-        return dict(
-            (
-                k.encode(), 
-                [(c.encode(), unicode(c)) for c in v]
-            )
-            for k, v in replaces.items()
-        )
-
-
-    cdef list _similar_keys(self, unicode current_prefix, unicode key, BaseType cur_index, dict replaces):
-        
-        cdef BaseType next_index, index = cur_index
-        cdef unicode prefix, u_replace_char, found_key
-        cdef bytes b_step, b_replace_char
-        cdef list res = []
-        cdef list extra_keys
-        
+    cdef list _similar_items(self, unicode cur_prefix, unicode key, BaseType cur_index):
+    
         cdef list values = []
-
-        cdef int start_pos = len(current_prefix)
+        cdef list results = []
+        
+        cdef bytes b_step, b_char
+        cdef BaseType index = cur_index
+        cdef BaseType next_index = cur_index
+        cdef unicode prefix, u_char, found_key
+        
         cdef int end_pos = len(key)
-        cdef int word_pos = start_pos
+        cdef int word_pos = len(cur_prefix)
+        cdef int start_pos = len(cur_prefix)
 
         while word_pos < end_pos:
             
-            b_step = <bytes>(key[word_pos].encode('utf8'))
+            b_step = <bytes>(key[word_pos].encode())
 
-            if b_step in replaces:
+            if b_step in self.replaces:
                 
-                for (b_replace_char, u_replace_char) in replaces[b_step]:
+                for (b_char, u_char) in self.replaces[b_step]:
                     
                     next_index = index
                     
-                    if self.dct.Follow(b_replace_char, &next_index):
-                        prefix = current_prefix + key[start_pos:word_pos] + u_replace_char
-                        extra_keys = self._similar_keys(prefix, key, next_index, replaces)
-                        res.extend(extra_keys)
+                    if self.dct.Follow(b_char, &next_index):
+                        prefix = cur_prefix + key[start_pos:word_pos] + u_char
+                        results.extend(self._similar_items(prefix, key, next_index))
 
-            if not self.dct.Follow(b_step, &index): return res
+            if not self.dct.Follow(b_step, &index): return results
             
             word_pos += 1
 
@@ -161,15 +124,11 @@ cdef class DAWG:
             while self.completer.Next():
                 values.append(string(self.completer.key()).decode('utf8'))
             
-            found_key = current_prefix + key[start_pos:]
-            res.extend([found_key + self.sep + v for v in values])
+            found_key = cur_prefix + key[start_pos:]
+            results.extend([found_key + self.sep + v for v in values])
 
-        return res
-
-
-    cpdef list similar_keys(self, unicode key, dict replaces):
-        return self._similar_keys("", key, self.dct.root(), replaces)
+        return results
 
 
-
-# https://stackoverflow.com/questions/30984078/cython-working-with-c-streams
+    cpdef list similar_items(self, unicode key):
+        return self._similar_items('', key, self.dct.root())

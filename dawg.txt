@@ -9,3 +9,4 @@ pip install .
 python3 test.py
 
 # https://github.com/pymorphy2-fork/DAWG.git
+# https://stackoverflow.com/questions/30984078/cython-working-with-c-streams
