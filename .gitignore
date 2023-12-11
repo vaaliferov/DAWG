@@ -4,4 +4,5 @@ build/
 *.dawg
 *.egg-info/
 src/dawg.cpp
+__pycache__/
 .ipynb_checkpoints/
