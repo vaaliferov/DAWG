@@ -4,11 +4,19 @@ cd DAWG
 
 python3 -m venv env
 source env/bin/activate
-pip install numpy
+pip install numpy polars
+pip install pyarrow pandas
+pip install tqdm lxml jupyter
+
 pip install .
+
+python3 -m ipykernel install --user --name dawg_env
 
 python3 test.py
 
+python3 -m jupyter notebook
+
 # https://github.com/pymorphy2-fork/DAWG.git
+# https://opencorpora.org/files/export/dict/dict.opcorpora.xml.zip
 # https://stackoverflow.com/questions/30984078/cython-working-with-c-streams
 # https://stackoverflow.com/questions/43658864/cython-convert-string-into-integers-and-floats

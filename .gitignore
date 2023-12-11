@@ -1,5 +1,7 @@
 env/
+data/
 build/
 *.dawg
 *.egg-info/
 src/dawg.cpp
+.ipynb_checkpoints/
