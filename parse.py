@@ -1,6 +1,5 @@
 from lxml import etree
 
-
 def parse_link(elem):
     values = elem.attrib.values()
     return tuple(map(int, values))
