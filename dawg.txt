@@ -16,5 +16,6 @@ python3 -m jupyter notebook
 
 # https://github.com/pymorphy2-fork/DAWG.git
 # https://opencorpora.org/files/export/dict/dict.opcorpora.xml.zip
+# https://opencorpora.org/files/export/annot/annot.opcorpora.xml.zip
 # https://stackoverflow.com/questions/30984078/cython-working-with-c-streams
 # https://stackoverflow.com/questions/43658864/cython-convert-string-into-integers-and-floats
