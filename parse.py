@@ -1,5 +1,6 @@
 from lxml import etree
 
+
 def parse_link(elem):
     values = elem.attrib.values()
     return tuple(map(int, values))
@@ -66,3 +67,19 @@ def parse_dict(path):
             'lemmas': lemmas, 'grammemes': grammemes}
 
     return data, cols
+
+
+def parse_annot(path):
+
+    lemma_counts = dict()
+    items = etree.iterparse(path)
+
+    for ev, elem in items:
+        if elem.tag == 'l':
+            lemma_id = int(elem.attrib['id'])
+            if lemma_id not in lemma_counts:
+                lemma_counts[lemma_id] = 0
+            lemma_counts[lemma_id] += 1
+            elem.clear()
+
+    return lemma_counts
